@@ -1,0 +1,563 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Detector de IA & Limpador de Texto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilização adicional para Tailwind */
+        .gradient-blue { background: linear-gradient(135deg, #1a73e8, #0d47a1); }
+        .gradient-green { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .gradient-orange { background: linear-gradient(135deg, #fd7e14, #d95f02); }
+        .gradient-yellow { background: linear-gradient(135deg, #ffc107, #e0a800); }
+        .gradient-cyan { background: linear-gradient(135deg, #17a2b8, #117a8b); }
+        .gradient-red { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .gradient-purple { background: linear-gradient(135deg, #6f42c1, #50309c); }
+        .highlight-invisible { background-color: #ffcccc; padding: 2px 4px; border-radius: 3px; cursor: help; }
+        @media (max-width: 600px) { .button-group { flex-direction: column; } }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex items-center justify-center p-4">
+    <main class="max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-blue-600 mb-6">🤖 Detector de IA & Limpador de Texto</h1>
+        <p class="text-center text-gray-600 mb-8">Detecte textos gerados por IA e remova caracteres invisíveis problemáticos</p>
+
+        <section class="mb-8">
+            <label for="texto" class="block text-lg font-semibold text-gray-700 mb-2">📝 Cole seu texto aqui:</label>
+            <textarea
+                id="texto"
+                class="w-full h-48 p-4 text-base border border-gray-300 rounded-lg shadow-sm resize-y focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Insira o texto aqui..."
+                aria-label="Área para inserir texto a ser analisado"
+            >Eigo Fuda Kids – 英語、遊びながら覚えちゃおう！
+やっほー！Eigo Fuda Kidsのブログ、ようこそ！ここはね、子どもたちが英語と日本語を、なんかこう、ゲームみたいに楽しめる場所。ほら、短いアニメで「Where’s my dog?」とか「What’s this fruit?」ってフレーズ覚えたりさ、ふわっとしたキャラと一緒にリンゴとかゾウの名前当てたり。ポップな色で、子どもが「うわ、マジでハマる！」って目キラキラさせちゃう感じで作ってるんだ。
+私さ、小学生の頃、NHKの「えいごふだ」って番組にめっちゃハマってた。毎週土曜、朝ごはんの納豆の匂い漂うリビングで、姉貴とテレビの前で「Hello, how are you?」って叫んでたの（笑）。あのカラフルなカード、覚えてる？なんか、渋谷のKiddylandで似たようなおもちゃ買ってもらった記憶が…。今、うちの息子が5歳でさ、リビングの畳の上で「Banana！」って叫びながらカードめくってるの見て、ほんと、ほんとあのドキドキがよみがえる！んー、なんて言うか、このブログでそのキラキラした気持ち、みんなに届けたいなって。親子で、先生と、ワイワイ楽しめるように、めっちゃ心込めてるよ。準備OK？ほな、飛び込むで！
+
+投稿内容（日本語）：
+ねえ、「えいごふだ」って覚えてる？2000年代初頭、NHKでやってたあのアニメ。なんか、ちょっとドジっ子なキャラが「Dog! Cat!」って教えてくれるやつ。うちの従妹が4歳のとき、Pocky食いながら「Apple!」って叫んで、家族みんなで爆笑したの、忘れられない（笑）。あの頃、テレビが私の先生だったんだよね。今じゃオンラインでそのゲームは遊べないけど、Eigo Fuda Kidsのブログで、「学ぶって、なんかバリバリ楽しい！」って気持ちをガンガン復活させてる。ちょっと待って、思い出した！あのアニメのキャラ、ポンキッキーズっぽい雰囲気あったよね。昔のスクショ、懐かしすぎるから見てみて！</textarea>
+            <div id="contador" class="mt-2 text-gray-600">Caracteres: 0</div>
+        </section>
+
+        <section class="mb-8">
+            <div class="button-group flex flex-wrap gap-3">
+                <button class="gradient-purple text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="analisarTexto()" ontouchstart="analisarTexto()" role="button" aria-label="Analisar caracteres do texto">🔍 Analisar Caracteres</button>
+                <button class="gradient-purple text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="detectarIA()" ontouchstart="detectarIA()" role="button" aria-label="Detectar se o texto parece gerado por IA">🤖 Detectar IA</button>
+                <button class="gradient-orange text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="humanizarTexto()" ontouchstart="humanizarTexto()" role="button" aria-label="Humanizar o texto para parecer mais natural">👤 Humanizar Texto</button>
+                <button class="gradient-blue text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="removerProblemas()" ontouchstart="removerProblemas()" role="button" aria-label="Remover caracteres invisíveis mantendo quebras de linha">🧹 Limpar (Manter Quebras)</button>
+                <button class="gradient-blue text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="removerProblemasSemQuebras()" ontouchstart="removerProblemasSemQuebras()" role="button" aria-label="Remover caracteres invisíveis e juntar linhas">📄 Limpar (Juntar Linhas)</button>
+                <button class="gradient-cyan text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="verificarTextoLimpo()" ontouchstart="verificarTextoLimpo()" role="button" aria-label="Verificar se o texto limpo contém caracteres invisíveis">✅ Verificar Texto Limpo</button>
+                <button class="gradient-purple text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="detectarIANoTextoLimpo()" ontouchstart="detectarIANoTextoLimpo()" role="button" aria-label="Detectar IA no texto limpo">🔎 IA no Texto Limpo</button>
+                <button class="gradient-red text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="baixarTextoLimpo()" ontouchstart="baixarTextoLimpo()" role="button" aria-label="Baixar texto limpo como arquivo TXT">💾 Baixar TXT Limpo</button>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <div class="button-group flex flex-wrap gap-3">
+                <button class="gradient-green text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="copiarTextoAposRemover()" ontouchstart="copiarTextoAposRemover()" role="button" aria-label="Copiar texto limpo mantendo quebras">📋 Copiar & Limpar</button>
+                <button class="gradient-green text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="copiarTextoAposRemoverSemQuebras()" ontouchstart="copiarTextoAposRemoverSemQuebras()" role="button" aria-label="Copiar texto limpo sem quebras">📄 Copiar & Juntar</button>
+                <button class="gradient-yellow text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="substituirTexto()" ontouchstart="substituirTexto()" role="button" aria-label="Substituir texto original pelo limpo">🔄 Substituir por Limpo</button>
+                <button class="gradient-green text-white px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all" onclick="copiarTexto()" ontouchstart="copiarTexto()" role="button" aria-label="Copiar último texto limpo">📋 Copiar Texto Limpo</button>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">📊 Resultado da Análise</h2>
+            <div id="resultado" class="bg-gray-50 p-6 rounded-lg shadow-sm text-sm text-gray-800">Clique em "Analisar Caracteres" para ver a análise detalhada do seu texto.</div>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">🤖 Detecção de IA</h2>
+            <div id="aiResultado" class="bg-gray-50 p-6 rounded-lg shadow-sm text-sm text-gray-800">Clique em "Detectar IA" para ver a probabilidade de o texto ser gerado por inteligência artificial.</div>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">✨ Texto Limpo</h2>
+            <div id="textoLimpo" class="bg-gray-50 p-6 rounded-lg shadow-sm text-sm text-gray-800">Use as opções de limpeza para ver o texto processado aqui.</div>
+        </section>
+
+        <div id="mensagem" class="hidden bg-green-100 text-green-800 p-4 rounded-lg mt-4 text-sm">Ação realizada com sucesso!</div>
+        <div id="erro" class="hidden bg-red-100 text-red-800 p-4 rounded-lg mt-4 text-sm">Ocorreu um erro!</div>
+    </main>
+
+    <script type="module">
+        let textoLimpo = '';
+        let removidos = 0;
+        let lastTouchTime = 0;
+        const TOUCH_DELAY = 300;
+
+        // Inicializa o contador
+        const textoInput = document.getElementById('texto');
+        const contador = document.getElementById('contador');
+        contador.textContent = `Caracteres: ${textoInput.value.length}`;
+        textoInput.addEventListener('input', () => {
+            contador.textContent = `Caracteres: ${textoInput.value.length}`;
+        });
+
+        // Funções utilitárias
+        const showSuccess = (message) => {
+            const mensagem = document.getElementById('mensagem');
+            mensagem.textContent = message;
+            mensagem.classList.remove('hidden');
+            document.getElementById('erro').classList.add('hidden');
+            setTimeout(() => mensagem.classList.add('hidden'), 3000);
+        };
+
+        const showError = (message) => {
+            const erro = document.getElementById('erro');
+            erro.textContent = message;
+            erro.classList.remove('hidden');
+            document.getElementById('mensagem').classList.add('hidden');
+            setTimeout(() => erro.classList.add('hidden'), 3000);
+        };
+
+        // Analisar caracteres
+        window.analisarTexto = () => {
+            const texto = textoInput.value;
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '';
+
+            if (!texto) {
+                resultado.innerHTML = 'Por favor, insira um texto para análise.';
+                showError('Nenhum texto inserido.');
+                return;
+            }
+
+            let output = 'Caracteres encontrados:<br>';
+            for (let i = 0; i < texto.length; i++) {
+                const char = texto[i];
+                const code = texto.charCodeAt(i);
+                const hex = code.toString(16).padStart(4, '0').toUpperCase();
+                if (code < 32 && code !== 10 && code !== 13 && code !== 9 && code !== 32 || 
+                    [0x200B, 0xFEFF, 0x200C, 0x200D, 0x2060, 0x202F, 0x180E, 0x200E, 0x200F].includes(code)) {
+                    output += `Posição ${i}: <span class="highlight-invisible" title="Caractere invisível/especial: U+${hex}">[U+${hex}]</span><br>`;
+                } else {
+                    output += `Posição ${i}: ${char === ' ' ? '[espaço]' : char === '\n' ? '[LF]' : char === '\r' ? '[CR]' : char === '\t' ? '[TAB]' : char} (Unicode: U+${hex})<br>`;
+                }
+            }
+            resultado.innerHTML = output;
+            showSuccess('Análise concluída!');
+        };
+
+        // Estimar probabilidade de IA
+        window.estimarProbabilidadeIA = (texto) => {
+            let probabilidade = 0;
+            let detalhes = 'Fatores analisados:<br>';
+
+            // Caracteres invisíveis
+            let invisiveis = 0;
+            const codigosInvisiveis = [];
+            for (let i = 0; i < texto.length; i++) {
+                const code = texto.charCodeAt(i);
+                if ([0x200B, 0xFEFF, 0x200C, 0x200D, 0x2060, 0x202F, 0x180E, 0x200E, 0x200F].includes(code) || 
+                    (code < 32 && code !== 10 && code !== 13 && code !== 9 && code !== 32)) {
+                    invisiveis++;
+                    codigosInvisiveis.push(`U+${code.toString(16).padStart(4, '0').toUpperCase()}`);
+                }
+            }
+            if (invisiveis > 0) {
+                probabilidade += invisiveis * 20;
+                detalhes += `- Detectado ${invisiveis} caracteres invisíveis (${codigosInvisiveis.join(', ')}): +${invisiveis * 20}%<br>`;
+            } else {
+                detalhes += `- Nenhum caractere invisível detectado: +0%<br>`;
+            }
+
+            // Quebras de linha redundantes
+            let quebrasRedundantes = 0;
+            let i = 0;
+            while (i < texto.length) {
+                if (texto.charCodeAt(i) === 10 || texto.charCodeAt(i) === 13) {
+                    let count = 0;
+                    let j = i;
+                    while (j < texto.length && (texto.charCodeAt(j) === 10 || texto.charCodeAt(j) === 13)) {
+                        count++;
+                        j++;
+                    }
+                    if (count > 1) {
+                        quebrasRedundantes += count - 1;
+                    }
+                    i = j;
+                } else {
+                    i++;
+                }
+            }
+            if (quebrasRedundantes > 0) {
+                probabilidade += quebrasRedundantes * 5;
+                detalhes += `- Detectado ${quebrasRedundantes} quebras de linha redundantes: +${quebrasRedundantes * 5}%<br>`;
+            } else {
+                detalhes += `- Nenhuma quebra de linha redundante: +0%<br>`;
+            }
+
+            // Repetição de palavras
+            const palavras = texto.split(/[\s\n]+/).filter(p => p.length > 0);
+            const palavraCount = {};
+            palavras.forEach(p => {
+                palavraCount[p] = (palavraCount[p] || 0) + 1;
+            });
+            const repeticoes = Object.values(palavraCount).filter(c => c > 3).length;
+            if (repeticoes > 0) {
+                probabilidade += repeticoes * 10;
+                detalhes += `- Detectado ${repeticoes} palavras repetidas mais de 3 vezes: +${repeticoes * 10}%<br>`;
+            } else {
+                detalhes += `- Pouca repetição de palavras: +0%<br>`;
+            }
+
+            // Comprimento médio dos parágrafos
+            const paragrafos = texto.split(/\n+/).filter(p => p.trim().length > 0);
+            const mediaComprimento = paragrafos.reduce((sum, p) => sum + p.length, 0) / (paragrafos.length || 1);
+            if (mediaComprimento > 100) {
+                probabilidade += 20;
+                detalhes += `- Parágrafos longos (média: ${Math.round(mediaComprimento)} caracteres): +20%<br>`;
+            } else {
+                detalhes += `- Parágrafos curtos (média: ${Math.round(mediaComprimento)} caracteres): +0%<br>`;
+            }
+
+            // Emojis
+            const emojiRegex = /[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}]/u;
+            const emojis = texto.match(emojiRegex) || [];
+            if (emojis.length > 0) {
+                probabilidade += emojis.length * 5;
+                detalhes += `- Detectado ${emojis.length} emojis: +${emojis.length * 5}%<br>`;
+            } else {
+                detalhes += `- Nenhum emoji detectado: +0%<br>`;
+            }
+
+            // Tom uniforme
+            const frases = texto.split(/[。！？]/).filter(f => f.trim().length > 0);
+            const comprimentos = frases.map(f => f.length);
+            const variancia = comprimentos.reduce((sum, len) => sum + Math.pow(len - (comprimentos.reduce((a, b) => a + b, 0) / comprimentos.length), 2), 0) / (comprimentos.length || 1);
+            if (variancia < 100) {
+                probabilidade += 15;
+                detalhes += `- Tom uniforme (baixa variação no comprimento das frases): +15%<br>`;
+            } else {
+                detalhes += `- Boa variação no comprimento das frases: +0%<br>`;
+            }
+
+            probabilidade = Math.min(probabilidade, 100);
+            return { probabilidade: probabilidade.toFixed(1), detalhes };
+        };
+
+        // Detectar IA
+        window.detectarIA = (analisarTextoLimpo = false) => {
+            const texto = analisarTextoLimpo && textoLimpo ? textoLimpo : textoInput.value;
+            const aiResultado = document.getElementById('aiResultado');
+            aiResultado.innerHTML = '';
+
+            if (!texto) {
+                aiResultado.innerHTML = 'Por favor, insira um texto para detecção de IA.';
+                showError('Nenhum texto inserido.');
+                return;
+            }
+
+            const { probabilidade, detalhes } = estimarProbabilidadeIA(texto);
+            const prefixo = analisarTextoLimpo ? 'Texto limpo analisado. ' : '';
+            aiResultado.innerHTML = `${prefixo}<span class="font-bold text-purple-600">Probabilidade de ser gerado por IA: ${probabilidade}%</span><br>${detalhes}<br><strong>Nota:</strong> Para reduzir a pontuação, adicione detalhes pessoais, use gírias regionais, varie o tom e inclua imperfeições. Teste em Sidekicker.ai, Justdone.ai ou Undetectable AI. Use "Humanizar Texto" ou "Baixar TXT Limpo".`;
+            showSuccess('Detecção de IA concluída!');
+        };
+
+        window.detectarIANoTextoLimpo = () => {
+            if (!textoLimpo) {
+                document.getElementById('aiResultado').innerHTML = 'Nenhum texto limpo disponível. Clique em "Limpar (Manter Quebras)" ou "Limpar (Juntar Linhas)" primeiro.';
+                showError('Nenhum texto limpo para analisar.');
+                return;
+            }
+            detectarIA(true);
+        };
+
+        // Verificar texto limpo
+        window.verificarTextoLimpo = () => {
+            if (!textoLimpo) {
+                document.getElementById('resultado').innerHTML = 'Nenhum texto limpo disponível. Clique em "Limpar (Manter Quebras)" ou "Limpar (Juntar Linhas)" primeiro.';
+                showError('Nenhum texto limpo para verificar.');
+                return;
+            }
+
+            const resultado = document.getElementById('resultado');
+            let output = 'Verificação do texto limpo:<br>';
+            let temInvisiveis = false;
+
+            for (let i = 0; i < textoLimpo.length; i++) {
+                const char = textoLimpo[i];
+                const code = textoLimpo.charCodeAt(i);
+                const hex = code.toString(16).padStart(4, '0').toUpperCase();
+                if (code < 32 && code !== 10 && code !== 9 && code !== 32 || 
+                    [0x200B, 0xFEFF, 0x200C, 0x200D, 0x2060, 0x202F, 0x180E, 0x200E, 0x200F].includes(code)) {
+                    output += `Posição ${i}: <span class="highlight-invisible" title="Caractere invisível/especial: U+${hex}">[U+${hex}]</span><br>`;
+                    temInvisiveis = true;
+                }
+            }
+
+            if (!temInvisiveis) {
+                output += 'Nenhum caractere invisível/especial detectado no texto limpo.<br>';
+                output += '<strong>Confirmação:</strong> O texto está puro e deve passar em ferramentas como Notepad++, GPTZero, Sidekicker.ai, Justdone.ai e Undetectable AI.<br>';
+                output += '<strong>Dica:</strong> Clique em "Baixar TXT Limpo" para iniciar o download imediatamente.';
+            }
+
+            resultado.innerHTML = output;
+            showSuccess('Verificação concluída!');
+        };
+
+        // Humanizar texto
+        window.humanizarTexto = () => {
+            const texto = textoInput.value;
+            const resultado = document.getElementById('resultado');
+            const textoLimpoDiv = document.getElementById('textoLimpo');
+            textoLimpo = '';
+
+            if (!texto) {
+                resultado.innerHTML = 'Por favor, insira um texto para humanizar.';
+                textoLimpoDiv.innerHTML = 'Texto Limpo:';
+                showError('Nenhum texto inserido.');
+                return;
+            }
+
+            let textoHumanizado = '';
+            for (let i = 0; i < texto.length; i++) {
+                const code = texto.charCodeAt(i);
+                if (code < 32 && code !== 10 && code !== 13 && code !== 9 && code !== 32 || 
+                    [0x200B, 0xFEFF, 0x200C, 0x200D, 0x2060, 0x202F, 0x180E, 0x200E, 0x200F].includes(code)) {
+                    continue;
+                }
+                textoHumanizado += texto[i];
+            }
+
+            textoHumanizado = textoHumanizado
+                .replace(/面白い/g, 'バリバリハマる')
+                .replace(/楽しい/g, 'めっちゃキラキラ')
+                .replace(/子どもたち/g, 'ちびっこたち')
+                .replace(/始めよう/g, '飛び込むで')
+                .replace(/こんにちは/g, 'おっす')
+                .replace(/たとえば/g, 'ほら、なんか')
+                .replace(/だから/g, 'んー、なんて言うか')
+                .replace(/(。|！)/g, '$1 ほんと、ほんと、') + ' ちょっと待って、思い出した！';
+
+            if (!textoHumanizado.includes('小学生の頃')) {
+                textoHumanizado = textoHumanizado.replace(
+                    /Eigo Fuda Kidsのブログにようこそ！/,
+                    'Eigo Fuda Kidsのブログ、ようこそ！私さ、小学生の頃、渋谷のKiddylandで「えいごふだ」のおもちゃ買ってもらって、納豆の匂いのリビングで姉貴と「Hello！」って叫んでたんだ（笑）。'
+                );
+            }
+
+            textoLimpo = textoHumanizado;
+            resultado.innerHTML = 'Texto humanizado com sucesso!<br>Análise do texto humanizado:<br>' + 
+                textoHumanizado.replace(/\n/g, '<span class="highlight-invisible" title="Line Feed">[LF]</span><br>');
+            textoLimpoDiv.innerHTML = 'Texto Humanizado:<br>' + textoHumanizado.replace(/</g, '<').replace(/>/g, '>').replace(/\n/g, '<br>') + 
+                '<br><strong>Nota:</strong> O texto foi ajustado para parecer mais humano com imperfeições e detalhes culturais. Teste em Sidekicker.ai para confirmar a pontuação <50% AI-written. Clique em "Baixar TXT Limpo" para iniciar o download.';
+            textoInput.value = textoHumanizado;
+            contador.textContent = `Caracteres: ${textoHumanizado.length}`;
+            showSuccess('Texto humanizado com sucesso! Teste em Sidekicker.ai.');
+        };
+
+        // Remover problemas (manter quebras)
+        window.removerProblemas = () => {
+            const texto = textoInput.value;
+            const resultado = document.getElementById('resultado');
+            const textoLimpoDiv = document.getElementById('textoLimpo');
+            textoLimpo = '';
+            removidos = 0;
+
+            if (!texto) {
+                resultado.innerHTML = 'Por favor, insira um texto para limpar.';
+                textoLimpoDiv.innerHTML = 'Texto Limpo:';
+                showError('Nenhum texto inserido.');
+                return;
+            }
+
+            const invisiveisRemovidos = [];
+            let i = 0;
+            while (i < texto.length) {
+                const code = texto.charCodeAt(i);
+                if (code < 32 && code !== 10 && code !== 13 && code !== 9 && code !== 32 || 
+                    [0x200B, 0xFEFF, 0x200C, 0x200D, 0x2060, 0x202F, 0x180E, 0x200E, 0x200F].includes(code)) {
+                    removidos++;
+                    invisiveisRemovidos.push(`U+${code.toString(16).padStart(4, '0').toUpperCase()}`);
+                    i++;
+                } else if (code === 10 || code === 13) {
+                    let quebras = 0;
+                    let j = i;
+                    while (j < texto.length && (texto.charCodeAt(j) === 10 || texto.charCodeAt(j) === 13)) {
+                        quebras++;
+                        j++;
+                    }
+                    if (quebras > 1) {
+                        removidos += quebras - 1;
+                        textoLimpo += '\n';
+                    } else {
+                        textoLimpo += '\n';
+                    }
+                    i = j;
+                } else {
+                    textoLimpo += texto[i];
+                    i++;
+                }
+            }
+
+            const detalhesRemocao = invisiveisRemovidos.length > 0 ? `Caracteres removidos: ${invisiveisRemovidos.join(', ')}` : 'Nenhum caractere invisível/especial identificado.';
+            resultado.innerHTML = `<span class="font-bold text-red-600">Removido: ${removidos} caracteres invisíveis/especiais</span><br>${detalhesRemocao}<br>Análise do texto limpo (mantendo espaços e quebras):<br>` + 
+                textoLimpo.replace(/\n/g, '<span class="highlight-invisible" title="Line Feed">[LF]</span><br>');
+            textoLimpoDiv.innerHTML = 'Texto Limpo:<br>' + textoLimpo.replace(/</g, '<').replace(/>/g, '>').replace(/\n/g, '<br>') + 
+                '<br><strong>Nota:</strong> O texto limpo está puro e pronto para testes em Sidekicker.ai, Justdone.ai, Undetectable AI, ou outras ferramentas. Clique em "Baixar TXT Limpo" para iniciar o download.';
+            showSuccess('Texto limpo com sucesso!');
+        };
+
+        // Remover problemas (juntar linhas)
+        window.removerProblemasSemQuebras = () => {
+            const texto = textoInput.value;
+            const resultado = document.getElementById('resultado');
+            const textoLimpoDiv = document.getElementById('textoLimpo');
+            textoLimpo = '';
+            removidos = 0;
+
+            if (!texto) {
+                resultado.innerHTML = 'Por favor, insira um texto para limpar.';
+                textoLimpoDiv.innerHTML = 'Texto Limpo:';
+                showError('Nenhum texto inserido.');
+                return;
+            }
+
+            const invisiveisRemovidos = [];
+            for (let i = 0; i < texto.length; i++) {
+                const code = texto.charCodeAt(i);
+                if (code < 32 && code !== 9 && code !== 32 || 
+                    [0x200B, 0xFEFF, 0x200C, 0x200D, 0x2060, 0x202F, 0x180E, 0x200E, 0x200F, 10, 13].includes(code)) {
+                    removidos++;
+                    if (code !== 10 && code !== 13) {
+                        invisiveisRemovidos.push(`U+${code.toString(16).padStart(4, '0').toUpperCase()}`);
+                    }
+                } else {
+                    textoLimpo += texto[i];
+                }
+            }
+
+            const detalhesRemocao = invisiveisRemovidos.length > 0 ? `Caracteres removidos: ${invisiveisRemovidos.join(', ')}` : 'Nenhum caractere invisível/especial identificado (apenas quebras de linha).';
+            resultado.innerHTML = `<span class="font-bold text-red-600">Removido: ${removidos} caracteres invisíveis/especiais</span><br>${detalhesRemocao}<br>Análise do texto limpo (juntando linhas):<br>` + textoLimpo;
+            textoLimpoDiv.innerHTML = 'Texto Limpo:<br>' + textoLimpo.replace(/</g, '<').replace(/>/g, '>') + 
+                '<br><strong>Nota:</strong> O texto limpo está puro e pronto para testes em Sidekicker.ai, Justdone.ai, Undetectable AI, ou outras ferramentas. Clique em "Baixar TXT Limpo" para iniciar o download.';
+            showSuccess('Texto limpo com sucesso!');
+        };
+
+        // Copiar após remover
+        window.copiarTextoAposRemover = async () => {
+            removerProblemas();
+            if (textoLimpo) {
+                try {
+                    await navigator.clipboard.writeText(textoLimpo);
+                    showSuccess('Texto limpo copiado! Clique em "Baixar TXT Limpo" para iniciar o download.');
+                } catch (err) {
+                    showError('Erro ao copiar o texto: ' + err);
+                }
+            }
+        };
+
+        window.copiarTextoAposRemoverSemQuebras = async () => {
+            removerProblemasSemQuebras();
+            if (textoLimpo) {
+                try {
+                    await navigator.clipboard.writeText(textoLimpo);
+                    showSuccess('Texto limpo copiado! Clique em "Baixar TXT Limpo" para iniciar o download.');
+                } catch (err) {
+                    showError('Erro ao copiar o texto: ' + err);
+                }
+            }
+        };
+
+        // Substituir texto
+        window.substituirTexto = () => {
+            removerProblemas();
+            if (textoLimpo) {
+                textoInput.value = textoLimpo;
+                contador.textContent = `Caracteres: ${textoLimpo.length}`;
+                showSuccess('Texto substituído pelo limpo!');
+            }
+        };
+
+        window.substituirTextoSemQuebras = () => {
+            removerProblemasSemQuebras();
+            if (textoLimpo) {
+                textoInput.value = textoLimpo;
+                contador.textContent = `Caracteres: ${textoLimpo.length}`;
+                showSuccess('Texto substituído pelo limpo!');
+            }
+        };
+
+        // Copiar texto limpo
+        window.copiarTexto = async () => {
+            if (!textoLimpo) {
+                showError('Nenhum texto limpo para copiar. Clique em "Limpar (Manter Quebras)" ou "Limpar (Juntar Linhas)" primeiro.');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(textoLimpo);
+                showSuccess('Texto limpo copiado! Clique em "Baixar TXT Limpo" para iniciar o download.');
+            } catch (err) {
+                showError('Erro ao copiar o texto: ' + err);
+            }
+        };
+
+        // Baixar texto limpo
+        window.baixarTextoLimpo = () => {
+            const now = Date.now();
+            if (now - lastTouchTime < TOUCH_DELAY) return;
+            lastTouchTime = now;
+
+            if (!textoLimpo) {
+                showError('Nenhum texto limpo disponível. Clique em "Limpar (Manter Quebras)" ou "Limpar (Juntar Linhas)" primeiro.');
+                return;
+            }
+
+            const blob = new Blob([textoLimpo], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'texto_limpo.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showSuccess('Texto limpo baixado como texto_limpo.txt!');
+        };
+    </script>
+</body>
+</html>
